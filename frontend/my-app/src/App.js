@@ -1,25 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import UserRegistration from "./components/forms/UserRegistration";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    // Function to handle form submission
+    const handleUserSubmit = (formData) => {
+        console.log("User registered:", formData);
+        // You can add further logic here (e.g., API calls)
+    };
+
+    return (
+        <div>
+            <h1>User Registration</h1>
+            <UserRegistration onSubmit={handleUserSubmit} />
+        </div>
+    );
 }
 
 export default App;
