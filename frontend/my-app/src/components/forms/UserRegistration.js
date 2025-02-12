@@ -1,48 +1,53 @@
-import React,{useState} from 'react';
+import React, {use, useState} from "react";
 
-const UserRegistration=()=>{
-    const [formData,setFormData]=useState({
-        name: '',
-        password: '',
-        email: '',
-        contact: ''
+const UserRegistration= ()=>
+        {
+            const[formData,setFormData]= useState({
+                name:"",
+                email:"",
+                contact:"",
+                password:""
+            });
 
-    });
+            const[errors,setErrors]=useState({});
+            const [submit,setIsSubmit]=useState(false);
 
-    const handleChange = (e) =>
-    {
-        const {name,value}=e.target;
-        setFormData(prev=> ({...prev,[name]:value}));
-    };
-
-    const handleSubmit = (e) =>
-    {
-        e.preventDefault();
-        console.log('Form submitted',formData);
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Username"
-            />
-            <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-            />
-            <input type="text" name="contact" value={formData.contact} onChange={handleChange} placeholder='Contact'/>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder='Password'/>
+            const validate=(values)=>
+            {
+                const newErrors={};
+                const nameRegex=/^[A-Za-z0-9]*$/i;
+                const passwordRegex=/^(?=.*[!@#$%^&*(),.?:{}|<>])[A-Z0-9!@#$%^&*(),.?:{}|<>]+$/i;//Lookahead ?=, it ensures that there is at least one special character
+                if(!nameRegex.test(values.name))
+                    errors.name="Invalid username";
+                if(values.password<8)
+                    errors.values="Password is shorter than 8 in length";
+                if(!passwordRegex.test(values.password))
+                    errors.values="Password is invalid";
+                return errors;
+            }
             
-            <button type="submit">Submit</button>
-        </form>
-    );
 
-};
+            const handleChange = (e) =>{
+                setFormData({... formData,[e.target.name]: e.target.value});
+                };
+
+                const handleSubmit = (e) => {
+                    e.preventDefault();
+                    setErrors(validate(formData));
+                    setIsSubmit(true);
+                    console.log("Form submitted", errors); 
+                };
+                return (
+                    <form onSubmit={handleSubmit}>
+                        <pre>{JSON.stringify(formData,"","","","")}</pre>
+                    <input type="text" name="name" placeholder="name" value={formData.name} onChange={handleChange} required/>
+                    <input type="email" name="email" placeholder="email" value={formData.email} onChange={handleChange} required/>
+                    <input type="text" name="contact" placeholder="contact" value={formData.contact} onChange={handleChange} required/>
+                    <input type="text" name="password" placeholder="password" value={formData.password} onChange={handleChange} required/>
+                    <button type="submit">Submit</button>
+                    </form>
+                    
+                );
+            };
+    
 export default UserRegistration;

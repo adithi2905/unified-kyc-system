@@ -15,6 +15,7 @@ const Login=()=>{
             <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
             <button onClick={handleLogin}>Login</button>
     </div>
-    )
+    );
 
-}
+};
+export default Login;

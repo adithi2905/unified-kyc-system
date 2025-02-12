@@ -1,19 +1,16 @@
 import React from "react";
 import UserRegistration from "./components/forms/UserRegistration";
+import {BrowserRouter,Routes,Route} from 'react-router-dom';
 
 function App() {
-    // Function to handle form submission
-    const handleUserSubmit = (formData) => {
-        console.log("User registered:", formData);
-        // You can add further logic here (e.g., API calls)
-    };
-
+    
     return (
-        <div>
-            <h1>User Registration</h1>
-            <UserRegistration onSubmit={handleUserSubmit} />
-        </div>
-    );
+        <BrowserRouter>
+            <Routes>
+                <Route path='/user' element={ <UserRegistration/>}></Route>
+            </Routes>
+        </BrowserRouter>
+    )
 }
 
 export default App;
