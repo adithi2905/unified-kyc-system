@@ -14,15 +14,19 @@ const UserRegistration= ()=>
 
             const validate=(values)=>
             {
-                const newErrors={};
+                let newErrors={};
                 const nameRegex=/^[A-Za-z0-9]*$/i;
                 const passwordRegex=/^(?=.*[!@#$%^&*(),.?:{}|<>])[A-Z0-9!@#$%^&*(),.?:{}|<>]+$/i;//Lookahead ?=, it ensures that there is at least one special character
+                const contactRegex=/^\+\d{11}$/i;
                 if(!nameRegex.test(values.name))
                     errors.name="Invalid username";
                 if(values.password<8)
                     errors.values="Password is shorter than 8 in length";
                 if(!passwordRegex.test(values.password))
                     errors.values="Password is invalid";
+                if(!contactRegex.test(values.contact))
+                    errors.contact="Contact number is invalid";
+
                 return errors;
             }
             
@@ -36,6 +40,7 @@ const UserRegistration= ()=>
                     setErrors(validate(formData));
                     setIsSubmit(true);
                     console.log("Form submitted", errors); 
+                    console.log("Form submitted", formData); 
                 };
                 return (
                     <form onSubmit={handleSubmit}>

@@ -1,5 +1,6 @@
 import React from "react";
 import UserRegistration from "./components/forms/UserRegistration";
+import KYCDocumentCollection from "./components/forms/KYCDocumentCollection";
 import {BrowserRouter,Routes,Route} from 'react-router-dom';
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path='/user' element={ <UserRegistration/>}></Route>
+                <Route path='/kycdoc' element={<KYCDocumentCollection/>}></Route>
             </Routes>
         </BrowserRouter>
     )
