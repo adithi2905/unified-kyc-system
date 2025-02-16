@@ -18,17 +18,15 @@ const KYCDocumentCollection = () =>
         e.preventDefault();
         setIsSubmit(true);
     }
+    const validate = (e)=>
+    {
+
+    }
     const handleChange =(e)=>
     {
         createKycDoc({...kycDocs,[e.target.name]:e.target.value});
     };
     return (<form>
-        <br/><br/><label for="fn" >Full Name:<br/>
-        <input type="text" id="fn" name="fullName" value={kycDocs.fullName} placeholder='fullName' onChange={handleChange} required/>
-        </label>
-        <br/><br/><label for="email" >E-mail<br/>
-        <input type="text" name="email" placeholder='email' value={kycDocs.email} onChange={handleChange} required/>
-        </label>
         <br/><br/><label for="dob" >Date of Birth:<br/>
         <input type="date" id="dob" name="dateofBirth" value={kycDocs.dateOfBirth} placeholder='dateofBirth' onChange={handleChange} required/>
         </label>
