@@ -1,5 +1,5 @@
+import { useNavigate } from "react-router-dom";
 import React, {useState} from "react";
-
 const UserRegistration= ()=>
         {
             const[formData,setFormData]= useState({
@@ -11,9 +11,9 @@ const UserRegistration= ()=>
                 password:""
             });
 
-
             const[errors,setErrors]=useState({});
             const [submit,setIsSubmit]=useState(false);
+            const navigate=useNavigate();
             const[validatePass,setPasswordValidation]=useState({
                 length: false,
                 uppercase: false,
@@ -66,14 +66,19 @@ const UserRegistration= ()=>
                     const validationErrors=validate(formData);
                     setErrors(validationErrors);
                     setIsSubmit(Object.keys(validationErrors).length === 0);
-                    console.log("Form submitted:", formData, validationErrors); };
+                    console.log("Form submitted:", formData, validationErrors); 
+                    if(submit)
+                    {
+                        navigate("/otp",{state: formData });   
+                    }
+                    };
                 return (
                     <form onSubmit={handleSubmit}>
                         <pre>{JSON.stringify(formData,"","","","")}</pre>
                     <br/><br/><label htmlFor="name" >Let's start with your name. Type it in!:<br/>
                     <input type="text" id="name" name="name" placeholder="name" value={formData.name} onChange={handleChange} required/>
                     </label>
-                    <br/><br/><label htmlFor="username" >Let's start with your name. Type it in!:<br/>
+                    <br/><br/><label htmlFor="username" >Let's proceed with username. Type it in!:<br/>
                     <input type="text" id="username" name="username" placeholder="username" value={formData.username} onChange={handleChange} required/>
                     </label>
                     
@@ -95,7 +100,7 @@ const UserRegistration= ()=>
                     <span style={{color: validatePass.specialChar? "green":"red"}}>{validatePass.specialChar ? "✅" : "❌"} Should have at least one special character </span><br/>
                     </div>
                     <br/><br/><label htmlFor="pass" >For your security, please create a strong password.<br/>
-                    <input type="text" name="password" placeholder="password" value={formData.password} onChange={handleChange} required/>
+                    <input type="password" name="password" placeholder="password" value={formData.password} onChange={handleChange} required/>
                     </label>
                     <button type="submit">Submit</button>
                     </form>
