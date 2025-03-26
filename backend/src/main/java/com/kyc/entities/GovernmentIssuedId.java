@@ -1,9 +1,6 @@
 package com.kyc.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,15 +9,35 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class GovernmentIssuedId {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long govtId;
+    @Column(name = "govt_id")// Primary key generation strategy
+    private Long Govtid;
+
+
+    private String ssn;
+
+    @Transient // This won't persist in the database
+    private MultipartFile ssnDoc;
+
     private String driversLicense;
-    private String driversLicenseDocPath;
+    @Transient
+    private MultipartFile driversLicenseDoc;
+
     private String passportId;
-    private String passportDocPath;
+    @Transient
+    private MultipartFile passportDoc;
+
     private String stateId;
-    private String stateIdDocPath;
+    @Transient
+    private MultipartFile stateIdDoc;
+
     private String militaryId;
-    private String militaryDocPath;
+    @Transient
+    private MultipartFile militaryDoc;
+
+    @OneToOne (cascade = CascadeType.ALL)
+    @JoinColumn(name = "userId", referencedColumnName = "userId", unique = true)
+    private User user;
 }

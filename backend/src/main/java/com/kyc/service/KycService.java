@@ -1,15 +1,20 @@
 package com.kyc.service;
 
-import com.kyc.dto.EmploymentInfoDto;
-import com.kyc.dto.GovernmentIssuedIdDto;
+
 import com.kyc.dto.KycDetailsDto;
-import com.kyc.entities.EmploymentInfo;
-import com.kyc.entities.GovernmentIssuedId;
-import com.kyc.entities.KycDetails;
-import com.kyc.entities.ProofOfAddress;
-import com.kyc.repositories.KycRepository;
+import com.kyc.entities.*;
+import com.kyc.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.kyc.utilities.securityConfig.*;
+import java.io.IOException;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class KycService {
@@ -20,52 +25,101 @@ public class KycService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    public void processKycDetails(KycDetailsDto request){
-        KycDetails kycDetails = new KycDetails();
-        kycDetails.setFullName(request.getFullName());
-        kycDetails.setEmail(request.getEmail());
-        kycDetails.setDateOfBirth(request.getDateOfBirth());
-        kycDetails.setGovernmentIssuedId(mapGovernmentIssuedId(request.getGovernmentIssuedId()));
-        kycDetails.setSsnNo(request.getSsnNo());
-        kycDetails.setProofOfAddress(mapProofOfAddress(request.getProofOfAddressDto()));
-        kycDetails.setEmploymentInfo(mapEmploymentInfo(request.getEmploymentInfoDto()));
+    @Autowired
+    private UserRepository userRepository;
 
-        // Handle file upload
-        String filePath = fileStorageService.storeFile(request.getSsnDoc());
-        kycDetails.setSsnDocPath(filePath);
+    @Autowired
+    private EmplymentInfoRepository emplymentInfoRepository;
 
-        // Save to database
-        kycRepo.save(kycDetails);
+    @Autowired
+    private FileMetaDataRepository fileMetaDataRepository;
+
+    @Autowired
+    private GovtIssueIdRepository govtIssueIdRepository;
+
+    @Autowired
+    private ProofOfAddressRepository proofOfAddressRepository;
+
+    @Autowired
+    private KycVerficationService kycVerficationService;
+
+    public void processKycDetails(KycDetailsDto request) throws Exception {
+
+        //Set User
+        // Retrieve logged-in user
+        Principal principal = null;
+        String userEmail = principal.getName(); // Fetch email from Principal
+        Optional<User> loggedInUserOpt = userRepository.findByEmail(userEmail);
+
+        if (loggedInUserOpt.isEmpty()) {
+            throw new Exception("User not found with email: " + userEmail);
+        }
+
+        User loggedInUser = loggedInUserOpt.get();
+        request.getGovernmentIssuedId().setUser(loggedInUser);
+        request.getEmploymentInfo().setUser(loggedInUser);
+        request.getProofOfAddress().setUser(loggedInUser);
+
+        //verify and update KycDetails
+        if(kycVerficationService.verifyKycDetails(request.getGovernmentIssuedId())) {
+
+            Map<String, String> documentHashes = new HashMap<>();
+
+            //Set File Uploads - GovernmentIssueId
+            String ssnCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getSsnDoc());
+            storeFileMetaData("SSN", loggedInUser);
+            documentHashes.put("ssn",ssnCid);
+
+            String driversLicenceCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getDriversLicenseDoc());
+            storeFileMetaData("DRIVERLICENSE", loggedInUser);
+            documentHashes.put("driversLicenceId",driversLicenceCid);
+
+            String militaryCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getMilitaryDoc());
+            storeFileMetaData("MILITARYID", loggedInUser);
+            documentHashes.put("militaryId",militaryCid);
+
+            String stateCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getStateIdDoc());
+            storeFileMetaData("STATEID", loggedInUser);
+            documentHashes.put("stateId",stateCid);
+
+            String passportCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getPassportDoc());
+            storeFileMetaData("PASSPORT", loggedInUser);
+            documentHashes.put("passportId",passportCid);
+
+            //Set File Uploads - EmploymentInfo
+            String empProofCid = fileStorageService.uploadFile(request.getEmploymentInfo().getEmpProofDoc());
+            storeFileMetaData("EMPPROOF", loggedInUser);
+            documentHashes.put("empProofId",empProofCid);
+
+            //Set File Uploads - Proof of Address
+            String ProofOfAddCid = fileStorageService.uploadFile(request.getProofOfAddress().getProofOfAddDoc());
+            storeFileMetaData(request.getProofOfAddress().getDocName(), loggedInUser);
+            documentHashes.put("ProofOfAdd",ProofOfAddCid);
+
+            // save in repos
+            emplymentInfoRepository.save(request.getEmploymentInfo());
+            govtIssueIdRepository.save(request.getGovernmentIssuedId());
+            proofOfAddressRepository.save(request.getProofOfAddress());
+        }
+
+        //call blockChain Service
+        //BlockchainRegisterUser
+        //BlockchainStoreonBlockChain
+
     }
 
-    private GovernmentIssuedId mapGovernmentIssuedId(GovernmentIssuedIdDto dto) {
-        GovernmentIssuedId entity = new GovernmentIssuedId();
-        entity.setDriversLicense(dto.getDriversLicense());
-        entity.setDriversLicenseDocPath(fileStorageService.storeFile(dto.getDriversLicenseDoc()));
-        entity.setPassportId(dto.getPassportId());
-        entity.setPassportDocPath(fileStorageService.storeFile(dto.getPassportDoc()));
-        entity.setStateId(dto.getStateId());
-        entity.setStateIdDocPath(fileStorageService.storeFile(dto.getStateIdDoc()));
-        entity.setMilitaryId(dto.getMilitaryId());
-        entity.setMilitaryDocPath(fileStorageService.storeFile(dto.getMilitaryDoc()));
-        return entity;
+    public void storeFileMetaData(String fileName, User loggedInUser){
+        FileMetaData fileInfo= new FileMetaData();
+
+        fileInfo.setFileName(fileName);
+        fileInfo.setUser(loggedInUser);
+        fileInfo.setOwnerId(loggedInUser.getUserId());
+        fileInfo.setUploadTimestamp(LocalDateTime.now());
+
+        fileMetaDataRepository.save(fileInfo);
     }
 
-    private ProofOfAddress mapProofOfAddress(main.java.com.kyc.dto.ProofOfAddressDto dto) {
-        ProofOfAddress entity = new ProofOfAddress();
-        entity.setPropertyOwnership(dto.getPropertyOwnership());
-        entity.setUtilityBillType(dto.getUtilityBillType());
-        entity.setUtilityDocPath(fileStorageService.storeFile(dto.getUtilityDoc()));
-        entity.setLeaseAgreementPath(fileStorageService.storeFile(dto.getLeaseAgreement()));
-        return entity;
-    }
 
-    private EmploymentInfo mapEmploymentInfo(EmploymentInfoDto dto) {
-        EmploymentInfo entity = new EmploymentInfo();
-        entity.setOccupation(dto.getOccupation());
-        entity.setEmployersName(dto.getEmployersName());
-        entity.setIncomeCertificatePath(fileStorageService.storeFile(dto.getIncomeCertificate()));
-        return entity;
-    }
+
 
 }

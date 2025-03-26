@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
     @Autowired
@@ -24,20 +26,27 @@ public class AuthService {
         return new BCryptPasswordEncoder();
     }
 
-    public void registerUser(UserDto request) {
+    public User registerUser(UserDto request) {
         // Save user
         User user = new User();
-        user.setName(request.getName());
+
+        user.setFullName(request.getName());
         user.setContact(request.getContact());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder().encode(request.getPassword()));
-        userRepo.save(user);
+        if(request.getPassword().equals(request.getConfirmPassword())){
+            user.setPassword(passwordEncoder().encode(request.getPassword()));
+            userRepo.save(user);
+        }
+        return user;
+
     }
 
-    public boolean loginUser(LoginDto loginDto){
-        User user = userRepo.findByEmailOrName(loginDto.getNameOremail(),loginDto.getNameOremail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return passwordEncoder().matches(loginDto.getPassword(), user.getPassword());
+    public Optional<User> loginUser(LoginDto loginDto){
+        Optional<User> user = userRepo.findByEmail(loginDto.getEmail());
+        if(user.isPresent() && passwordEncoder().matches(loginDto.getPassword(), user.get().getPassword())){
+            return user;
+        }
+        return Optional.empty();
     }
 
 }

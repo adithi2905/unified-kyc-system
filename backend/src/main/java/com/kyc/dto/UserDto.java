@@ -10,4 +10,5 @@ public class UserDto {
     private String email;
     private String contact;
     private String password;
+    private String confirmPassword;
 }

@@ -1,12 +1,10 @@
 package com.kyc.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Getter
@@ -17,5 +15,10 @@ public class EmploymentInfo {
     private Long empId;
     private String occupation;
     private String employersName;
-    private String incomeCertificatePath;
+    @Transient
+    private MultipartFile empProofDoc;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userId", referencedColumnName = "userId")
+    private User user;
 }

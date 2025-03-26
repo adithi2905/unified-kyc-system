@@ -2,16 +2,33 @@ package com.kyc.controller;
 
 import com.kyc.dto.KycDetailsDto;
 import com.kyc.dto.LoginDto;
+import com.kyc.dto.SessionLogin;
 import com.kyc.dto.UserDto;
-import com.kyc.service.KycService;
+import com.kyc.entities.User;
+import com.kyc.service.*;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.kyc.service.AuthService;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Date;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("api/")
+@CrossOrigin("https//localhost:3000")
 public class UnifiedKycController{
+
+    @Autowired
+    private SecretKey jwtSecretKey;
+
+    @Autowired
+    private long jwtExpiration;
 
     @Autowired
     private AuthService authService;
@@ -19,26 +36,85 @@ public class UnifiedKycController{
     @Autowired
     private KycService kycService;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
+    private KycVerficationService kycVerficationService;
+
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDto userDto){
-        authService.registerUser(userDto);
+        User user=authService.registerUser(userDto);
+        if (user.getPassword().isEmpty()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Password is not matching");
+        }
         return ResponseEntity.ok ("User registered successfully") ;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginDto loginDto){
-        boolean isAuthenticated = authService.loginUser(loginDto);
-        if (isAuthenticated) {
-            return ResponseEntity.ok("Login successful.");
+    public ResponseEntity<SessionLogin> loginUser(@RequestBody LoginDto loginDto){
+        Optional<User> user = authService.loginUser(loginDto);
+        if (user.isPresent()) {
+            // Generate JWT
+            String token = Jwts.builder()
+                    .setSubject(user.get().getEmail())
+                    .claim("userId", user.get().getUserId())
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                    .signWith(jwtSecretKey)
+                    .compact();
+
+            SessionLogin response = new SessionLogin();
+            response.setMessage("Login successful");
+            response.setData(user.get());
+            response.setAccessToken(token);
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
+            SessionLogin response = new SessionLogin();
+            response.setMessage("Invalid Credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
-    @PostMapping("/submit")
+    @PostMapping("/submitKyc")
     public ResponseEntity<String> submitKycDetails(
-            @ModelAttribute KycDetailsDto kycDetailsRequest) { // Handle MultipartFile
+            @ModelAttribute KycDetailsDto kycDetailsRequest) throws Exception {
+
+        //Optional<User> loggedInUser = userService.getUserByEmail(principal.getName());
         kycService.processKycDetails(kycDetailsRequest);
         return ResponseEntity.ok("KYC details submitted successfully.");
     }
+
+    @PostMapping("/uploadFile")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file){
+        try {
+            if (file == null || file.isEmpty()) {
+                System.out.println("File is null or empty");
+                throw new IllegalArgumentException("File must not be null or empty");
+            }
+
+            String cid = fileStorageService.uploadFile(file);
+            return ResponseEntity.ok("File uploaded successfully. CID: " + cid);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("File upload failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/retriveFile/{cid}")
+    public ResponseEntity<byte[]> retriveFile(@PathVariable String cid){
+        try {
+            byte[] fileData = fileStorageService.retrieveFile(cid);
+            return ResponseEntity.ok(fileData);
+        } catch (IOException e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+
+//    @PostMapping("/verfiyKyc")
+//    public ResponseEntity<String> kycVerification(@RequestBody KycDetailsDto kycDetailsDto){
+//        boolean kycVerficationService.
+//    }
 }

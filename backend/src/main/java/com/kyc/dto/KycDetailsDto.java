@@ -1,5 +1,8 @@
 package com.kyc.dto;
 
+import com.kyc.entities.EmploymentInfo;
+import com.kyc.entities.GovernmentIssuedId;
+import com.kyc.entities.ProofOfAddress;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -7,12 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class KycDetailsDto {
-    private String fullName;
-    private String email;
-    private String dateOfBirth;
-    private GovernmentIssuedIdDto governmentIssuedId;
-    private String ssnNo;
-    private MultipartFile ssnDoc;
-    private main.java.com.kyc.dto.ProofOfAddressDto proofOfAddressDto;
-    private EmploymentInfoDto employmentInfoDto;
+
+    private GovernmentIssuedId governmentIssuedId;
+    private ProofOfAddress proofOfAddress;
+    private EmploymentInfo employmentInfo;
+
 }
