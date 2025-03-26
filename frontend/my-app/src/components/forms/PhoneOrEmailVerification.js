@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { auth, RecaptchaVerifier, signInWithPhoneNumber } from "./firebase-config.js";
+import "./forms.css"
 
 const PhoneOrEmailVerification = () => {
     const location = useLocation();
