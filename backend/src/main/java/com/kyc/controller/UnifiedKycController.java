@@ -10,10 +10,13 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.crypto.SecretKey;
+
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Date;
@@ -24,11 +27,16 @@ import java.util.Optional;
 @CrossOrigin("https//localhost:3000")
 public class UnifiedKycController{
 
-    @Autowired
-    private SecretKey jwtSecretKey;
+//    @Autowired
+//    private SecretKey jwtSecretKey;
+//
+//    @Autowired
+//    private long jwtExpiration;
+
+    private final AuthenticationManager authenticationManager;
 
     @Autowired
-    private long jwtExpiration;
+    private TokenService tokenService;
 
     @Autowired
     private AuthService authService;
@@ -45,6 +53,10 @@ public class UnifiedKycController{
     @Autowired
     private UserService userService;
 
+    public UnifiedKycController(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDto userDto){
         User user=authService.registerUser(userDto);
@@ -59,13 +71,12 @@ public class UnifiedKycController{
         Optional<User> user = authService.loginUser(loginDto);
         if (user.isPresent()) {
             // Generate JWT
-            String token = Jwts.builder()
-                    .setSubject(user.get().getEmail())
-                    .claim("userId", user.get().getUserId())
-                    .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                    .signWith(jwtSecretKey)
-                    .compact();
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            loginDto.getEmail(),
+                            loginDto.getPassword()
+                    ));
+            String token = tokenService.generateToken(authentication);
 
             SessionLogin response = new SessionLogin();
             response.setMessage("Login successful");

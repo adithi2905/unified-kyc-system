@@ -4,19 +4,19 @@ package com.kyc.service;
 import com.kyc.dto.KycDetailsDto;
 import com.kyc.entities.*;
 import com.kyc.repositories.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.kyc.utilities.securityConfig.*;
-import java.io.IOException;
-import java.security.Principal;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class KycService {
 
     @Autowired
@@ -47,8 +47,29 @@ public class KycService {
 
         //Set User
         // Retrieve logged-in user
-        Principal principal = null;
-        String userEmail = principal.getName(); // Fetch email from Principal
+//        Principal principal = null;
+//        String userEmail = principal.getName(); // Fetch email from Principal
+//        Optional<User> loggedInUserOpt = userRepository.findByEmail(userEmail);
+//
+//        if (loggedInUserOpt.isEmpty()) {
+//            throw new Exception("User not found with email: " + userEmail);
+//        }
+//
+//        User loggedInUser = loggedInUserOpt.get();
+//        request.getGovernmentIssuedId().setUser(loggedInUser);
+//        request.getEmploymentInfo().setUser(loggedInUser);
+//        request.getProofOfAddress().setUser(loggedInUser);
+
+// Retrieve the logged-in user's email from SecurityContextHolder
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new Exception("User is not authenticated");
+        }
+
+        String userEmail = authentication.getName(); // This is typically the username or email in JWT
+
+// Fetch the user from the database
         Optional<User> loggedInUserOpt = userRepository.findByEmail(userEmail);
 
         if (loggedInUserOpt.isEmpty()) {
@@ -56,50 +77,101 @@ public class KycService {
         }
 
         User loggedInUser = loggedInUserOpt.get();
+
+// Set User for KYC details
         request.getGovernmentIssuedId().setUser(loggedInUser);
         request.getEmploymentInfo().setUser(loggedInUser);
         request.getProofOfAddress().setUser(loggedInUser);
+        System.out.println("loggedInUser" + loggedInUser.getEmail());
 
         //verify and update KycDetails
         if(kycVerficationService.verifyKycDetails(request.getGovernmentIssuedId())) {
 
             Map<String, String> documentHashes = new HashMap<>();
 
-            //Set File Uploads - GovernmentIssueId
-            String ssnCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getSsnDoc());
-            storeFileMetaData("SSN", loggedInUser);
-            documentHashes.put("ssn",ssnCid);
+//            //Set File Uploads - GovernmentIssueId
+//            String ssnCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getSsnDoc());
+//            storeFileMetaData("SSN", loggedInUser);
+//            documentHashes.put("ssn",ssnCid);
+//
+//            String driversLicenceCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getDriversLicenseDoc());
+//            storeFileMetaData("DRIVERLICENSE", loggedInUser);
+//            documentHashes.put("driversLicenceId",driversLicenceCid);
+//
+//            String militaryCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getMilitaryDoc());
+//            storeFileMetaData("MILITARYID", loggedInUser);
+//            documentHashes.put("militaryId",militaryCid);
+//
+//            String stateCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getStateIdDoc());
+//            storeFileMetaData("STATEID", loggedInUser);
+//            documentHashes.put("stateId",stateCid);
+//
+//            String passportCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getPassportDoc());
+//            storeFileMetaData("PASSPORT", loggedInUser);
+//            documentHashes.put("passportId",passportCid);
+//
+//            //Set File Uploads - EmploymentInfo
+//            String empProofCid = fileStorageService.uploadFile(request.getEmploymentInfo().getEmpProofDoc());
+//            storeFileMetaData("EMPPROOF", loggedInUser);
+//            documentHashes.put("empProofId",empProofCid);
+//
+//            //Set File Uploads - Proof of Address
+//            String ProofOfAddCid = fileStorageService.uploadFile(request.getProofOfAddress().getProofOfAddDoc());
+//            storeFileMetaData(request.getProofOfAddress().getDocName(), loggedInUser);
+//
 
-            String driversLicenceCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getDriversLicenseDoc());
-            storeFileMetaData("DRIVERLICENSE", loggedInUser);
-            documentHashes.put("driversLicenceId",driversLicenceCid);
+            // Set File Uploads - GovernmentIssuedId
+            if (request.getGovernmentIssuedId() != null) {
+                if (request.getGovernmentIssuedId().getSsnDoc() != null) {
+                    String ssnCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getSsnDoc());
+                    storeFileMetaData("SSN", loggedInUser);
+                    documentHashes.put("ssn", ssnCid);
+                }
 
-            String militaryCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getMilitaryDoc());
-            storeFileMetaData("MILITARYID", loggedInUser);
-            documentHashes.put("militaryId",militaryCid);
+                if (request.getGovernmentIssuedId().getDriversLicenseDoc() != null) {
+                    String driversLicenceCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getDriversLicenseDoc());
+                    storeFileMetaData("DRIVERLICENSE", loggedInUser);
+                    documentHashes.put("driversLicenceId", driversLicenceCid);
+                }
 
-            String stateCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getStateIdDoc());
-            storeFileMetaData("STATEID", loggedInUser);
-            documentHashes.put("stateId",stateCid);
+                if (request.getGovernmentIssuedId().getMilitaryDoc() != null) {
+                    String militaryCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getMilitaryDoc());
+                    storeFileMetaData("MILITARYID", loggedInUser);
+                    documentHashes.put("militaryId", militaryCid);
+                }
 
-            String passportCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getPassportDoc());
-            storeFileMetaData("PASSPORT", loggedInUser);
-            documentHashes.put("passportId",passportCid);
+                if (request.getGovernmentIssuedId().getStateIdDoc() != null) {
+                    String stateCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getStateIdDoc());
+                    storeFileMetaData("STATEID", loggedInUser);
+                    documentHashes.put("stateId", stateCid);
+                }
 
-            //Set File Uploads - EmploymentInfo
-            String empProofCid = fileStorageService.uploadFile(request.getEmploymentInfo().getEmpProofDoc());
-            storeFileMetaData("EMPPROOF", loggedInUser);
-            documentHashes.put("empProofId",empProofCid);
+                if (request.getGovernmentIssuedId().getPassportDoc() != null) {
+                    String passportCid = fileStorageService.uploadFile(request.getGovernmentIssuedId().getPassportDoc());
+                    storeFileMetaData("PASSPORT", loggedInUser);
+                    documentHashes.put("passportId", passportCid);
+                }
+            }
 
-            //Set File Uploads - Proof of Address
-            String ProofOfAddCid = fileStorageService.uploadFile(request.getProofOfAddress().getProofOfAddDoc());
-            storeFileMetaData(request.getProofOfAddress().getDocName(), loggedInUser);
-            documentHashes.put("ProofOfAdd",ProofOfAddCid);
+// Set File Uploads - EmploymentInfo
+            if (request.getEmploymentInfo() != null && request.getEmploymentInfo().getEmpProofDoc() != null) {
+                String empProofCid = fileStorageService.uploadFile(request.getEmploymentInfo().getEmpProofDoc());
+                storeFileMetaData("EMPPROOF", loggedInUser);
+                documentHashes.put("empProofId", empProofCid);
+            }
+
+// Set File Uploads - Proof of Address
+            if (request.getProofOfAddress() != null && request.getProofOfAddress().getProofOfAddDoc() != null) {
+                String proofOfAddCid = fileStorageService.uploadFile(request.getProofOfAddress().getProofOfAddDoc());
+                storeFileMetaData(request.getProofOfAddress().getDocName(), loggedInUser);
+                documentHashes.put("ProofOfAdd", proofOfAddCid);
+            }
+
 
             // save in repos
-            emplymentInfoRepository.save(request.getEmploymentInfo());
-            govtIssueIdRepository.save(request.getGovernmentIssuedId());
-            proofOfAddressRepository.save(request.getProofOfAddress());
+            emplymentInfoRepository.saveAndFlush(request.getEmploymentInfo());
+            govtIssueIdRepository.saveAndFlush(request.getGovernmentIssuedId());
+            proofOfAddressRepository.saveAndFlush(request.getProofOfAddress());
         }
 
         //call blockChain Service

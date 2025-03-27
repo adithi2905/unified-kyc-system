@@ -8,6 +8,8 @@ import com.kyc.entities.User;
 import com.kyc.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class AuthService {
+public class AuthService implements UserDetailsService {
     @Autowired
     public UserRepository userRepo;
 
@@ -48,5 +50,23 @@ public class AuthService {
         }
         return Optional.empty();
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        try {
+            Optional<User> user = userRepo.findByEmail(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("User not found with username: " + username);
+            }
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(username)
+                    .password(user.get().getPassword())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Error occurred while loading user by username", e);
+        }
+    }
+
+
 
 }
