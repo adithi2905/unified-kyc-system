@@ -14,7 +14,7 @@ public class CertificateService {
                 {
                 Certificate cert= new Certificate(name,ssn,dob);
                 ObjectMapper mapper=new ObjectMapper();
-                mapper.writerWithDefaultPrettyPrinter().writeValue(new File("/Users/adith/innoquest/unified-kyc-system/frontend/my-app/Certificate.json"), cert);
+                mapper.writerWithDefaultPrettyPrinter().writeValue(new File("Certificate.json"), cert);
                 } 
                 catch(Exception ex)
                 {

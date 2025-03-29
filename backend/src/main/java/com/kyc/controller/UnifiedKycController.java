@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("api/")
+@RequestMapping("api/kyc/")
 @CrossOrigin("https//localhost:3000")
 public class UnifiedKycController{
 
@@ -32,10 +32,13 @@ public class UnifiedKycController{
 //
 //    @Autowired
 //    private long jwtExpiration;
+@Autowired
+private CertificateService certService;
+
 
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
+@Autowired
     private TokenService tokenService;
 
     @Autowired
@@ -128,4 +131,12 @@ public class UnifiedKycController{
 //    public ResponseEntity<String> kycVerification(@RequestBody KycDetailsDto kycDetailsDto){
 //        boolean kycVerficationService.
 //    }
+@PostMapping("/generateCertificate")
+    public ResponseEntity<String> generateCert(@RequestParam String name, @RequestParam String dob, @RequestParam String ssnNo)
+    {
+        certService.generateCertificate(name, dob, ssnNo);
+        return ResponseEntity.ok("Certificate generated");
+    }
+    
+
 }
