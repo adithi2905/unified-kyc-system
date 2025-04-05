@@ -74,7 +74,7 @@ const UserRegistration= ()=>
                     }
                     };
                 return (
-                    <form onSubmit={handleSubmit}>
+                    <form action="/register" method="POST" onSubmit={handleSubmit}>
                         <pre>{JSON.stringify(formData,"","","","")}</pre>
                     <br/><br/><label htmlFor="name" >Let's start with your name. Type it in!:<br/>
                     <input type="text" id="name" name="name" placeholder="name" value={formData.name} onChange={handleChange} required/>
