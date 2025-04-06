@@ -35,10 +35,8 @@ public class AuthService implements UserDetailsService {
         user.setFullName(request.getName());
         user.setContact(request.getContact());
         user.setEmail(request.getEmail());
-        if(request.getPassword().equals(request.getConfirmPassword())){
-            user.setPassword(passwordEncoder().encode(request.getPassword()));
-            userRepo.save(user);
-        }
+        user.setPassword(passwordEncoder().encode(request.getPassword()));
+        userRepo.save(user);
         return user;
 
     }

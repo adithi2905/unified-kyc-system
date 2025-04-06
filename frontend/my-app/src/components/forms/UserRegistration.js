@@ -9,7 +9,8 @@ const UserRegistration= ()=>
                 email:"",
                 countryCode:"",
                 contact:"",
-                password:""
+                password:"",
+                confirmPassword:""
             });
 
             const[errors,setErrors]=useState({});
@@ -53,6 +54,8 @@ const UserRegistration= ()=>
                 const isPasswordValid=validatePassword(values.password);
                 if(!isPasswordValid)
                     newErrors.password="Your password doesn't meet the requirements";
+                if (values.password !== values.confirmPassword)
+                    newErrors.confirmPassword = "Passwords do not match";            
                 return newErrors;
             }
     
@@ -60,21 +63,26 @@ const UserRegistration= ()=>
                 setFormData({... formData,[e.target.name]: e.target.value});
                 if(e.target.name==="password")
                     validatePassword(e.target.value);
-                };
 
-                const handleSubmit = (e) => {
+
+                };
+                
+                const handleSubmit = async (e) => {
                     e.preventDefault();
                     const validationErrors=validate(formData);
                     setErrors(validationErrors);
-                    setIsSubmit(Object.keys(validationErrors).length === 0);
-                    console.log("Form submitted:", formData, validationErrors); 
+                    if(Object.keys(validationErrors).length === 0)
+                        setIsSubmit(true);
+                    console.log("Form submitted:", formData, validationErrors);
+                
                     if(submit)
-                    {
                         navigate("/otp",{state: formData });   
+                    else
+                        alert("Passwords don't match");
                     }
-                    };
+                    
                 return (
-                    <form action="/register" method="POST" onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit}>
                         <pre>{JSON.stringify(formData,"","","","")}</pre>
                     <br/><br/><label htmlFor="name" >Let's start with your name. Type it in!:<br/>
                     <input type="text" id="name" name="name" placeholder="name" value={formData.name} onChange={handleChange} required/>
@@ -102,6 +110,8 @@ const UserRegistration= ()=>
                     </div>
                     <br/><br/><label htmlFor="pass" >For your security, please create a strong password.<br/>
                     <input type="password" name="password" placeholder="password" value={formData.password} onChange={handleChange} required/>
+                    <input type="password" name="confirmPassword" placeholder="password" value={formData.confirmPassword} onChange={handleChange} required/>
+                    
                     </label>
                     <button type="submit">Submit</button>
                     </form>
