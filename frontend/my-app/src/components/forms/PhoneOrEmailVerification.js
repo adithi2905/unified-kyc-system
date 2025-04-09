@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { auth, RecaptchaVerifier, signInWithPhoneNumber } from "./firebase-config.js";
 import "./forms.css"
 
@@ -9,6 +9,7 @@ const PhoneOrEmailVerification = () => {
     const [otp, setOtp] = useState("");
     const [confirmationResult, setConfirmationResult] = useState(null);
     const fullPhoneNumber = `+1${formData.contact}`;
+    const navigate=useNavigate();
 
     useEffect(() => {
         const sendOTP = async () => {
@@ -36,6 +37,7 @@ const PhoneOrEmailVerification = () => {
                 const confirmation = await signInWithPhoneNumber(auth,fullPhoneNumber, window.recaptchaVerifier);
                 setConfirmationResult(confirmation);
                 alert("OTP sent successfully!");
+                navigate("/register", { state: formData });
             } catch (error) {
                 console.error("Error sending OTP:", error);
                 alert(`Failed to send OTP: ${error.message}`);
@@ -59,10 +61,15 @@ const PhoneOrEmailVerification = () => {
 
             await confirmationResult.confirm(otp);
             alert("Phone number verified successfully!");
-            navigate('/register',{state:formData});
+            navigation();
         } catch (error) {
             console.error("Error verifying OTP:", error);
             alert("Invalid OTP. Please try again.");
+        }
+
+        const navigation =(e)=>
+        {
+            navigate('/register',{state:formData});
         }
     };
 

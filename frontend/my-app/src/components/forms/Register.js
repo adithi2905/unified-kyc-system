@@ -9,7 +9,6 @@ const Register = () => {
   const registerUser = async () => {
     console.log('Form Data being sent:', JSON.stringify(formData, null, 2));
     
-    // Correct mapping to use location.state
     const userData = {
       name: formData.state?.name,
       email: formData.state?.email,

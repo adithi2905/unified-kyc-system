@@ -77,7 +77,7 @@ const UserRegistration = () => {
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmit(true);
       console.log("Form submitted:", formData);
-      navigate("/register", { state: formData });
+      navigate("/otp",{state:formData});
     } else {
       showAlert(validationErrors);
     }
