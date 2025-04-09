@@ -11,4 +11,8 @@ public class UserDto {
     private String contact;
     private String password;
     private String confirmPassword;
+
+    public boolean isPasswordValid() {
+        return password != null && password.equals(confirmPassword);
+    }
 }

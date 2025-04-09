@@ -34,11 +34,19 @@ public class UnifiedKycController{
     private SsnExtractionService ssnExtractionService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto){
-        authService.registerUser(userDto);
-        return ResponseEntity.ok ("User registered successfully") ;
+    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
+        try {
+            User registeredUser = authService.registerUser(userDto);
+            return ResponseEntity.ok("User registered successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred during registration: " + e.getMessage());
+        }
     }
 
+    
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody LoginDto loginDto){
         Optional<User> isAuthenticated = authService.loginUser(loginDto);

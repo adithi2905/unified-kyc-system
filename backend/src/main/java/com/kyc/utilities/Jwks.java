@@ -7,6 +7,10 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 public class Jwks {
     private Jwks() {}
     public static RSAKey generateRsa() {
@@ -18,4 +22,4 @@ public class Jwks {
                 .keyID(UUID.randomUUID().toString())
                 .build();
     }
-}
+   }

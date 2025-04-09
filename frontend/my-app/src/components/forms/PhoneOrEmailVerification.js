@@ -59,6 +59,7 @@ const PhoneOrEmailVerification = () => {
 
             await confirmationResult.confirm(otp);
             alert("Phone number verified successfully!");
+            navigate('/register',{state:formData});
         } catch (error) {
             console.error("Error verifying OTP:", error);
             alert("Invalid OTP. Please try again.");

@@ -22,20 +22,20 @@ public class AuthService implements UserDetailsService {
     @Autowired
     public UserRepository userRepo;
 
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public User registerUser(UserDto request) {
         // Save user
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
         User user = new User();
-
         user.setFullName(request.getName());
         user.setContact(request.getContact());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder().encode(request.getPassword()));
+    
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepo.save(user);
         return user;
 
@@ -43,7 +43,7 @@ public class AuthService implements UserDetailsService {
 
     public Optional<User> loginUser(LoginDto loginDto){
         Optional<User> user = userRepo.findByEmail(loginDto.getEmail());
-        if(user.isPresent() && passwordEncoder().matches(loginDto.getPassword(), user.get().getPassword())){
+        if(user.isPresent() && passwordEncoder.matches(loginDto.getPassword(), user.get().getPassword())){
             return user;
         }
         return Optional.empty();

@@ -19,10 +19,6 @@ const KYCDocumentCollection = () =>
         e.preventDefault();
         setIsSubmit(true);
     }
-    const validate = (e)=>
-    {
-
-    }
     const handleChange =(e)=>
     {
         createKycDoc({...kycDocs,[e.target.name]:e.target.value});

@@ -21,6 +21,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -54,6 +55,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(Customizer.withDefaults())
@@ -64,8 +70,7 @@ public class SecurityConfig {
         "/api/login",
         "/swagger-ui.html",
         "/swagger-ui/**",
-        "/v3/api-docs/**"
-    ).permitAll()
+        "/v3/api-docs/**").permitAll()
     .anyRequest().authenticated()
 ).sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -75,6 +80,8 @@ public class SecurityConfig {
                 )
                 .build();
     }
+
+    
 
     @Bean
     public AuthenticationManager authManager(UserDetailsService userDetailsService) {
@@ -87,15 +94,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource()
     {
-        CorsConfiguration corsConfig=new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
-        corsConfig.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
-        return source;
-        
-    }
-
+            CorsConfiguration corsConfig = new CorsConfiguration();
+            corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
+            corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            corsConfig.setAllowedHeaders(List.of("*"));
+            corsConfig.setAllowCredentials(true);
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", corsConfig);
+            return source;
+        }
+    
 }
