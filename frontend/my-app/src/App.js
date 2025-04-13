@@ -6,6 +6,7 @@ import Certificate from "./components/Dashboard/Certificate";
 import {BrowserRouter,Routes,Route} from 'react-router-dom';
 import Register from "./components/forms/register";
 import Login from "./components/auth/login";
+
 function App() {
     
     return (

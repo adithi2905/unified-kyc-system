@@ -13,8 +13,8 @@ public class SwaggerConfig {
     public OpenAPI apiInfo() {
         return new OpenAPI()
             .info(new Info()
-                .title("SSN Extractor API")
-                .description("API for OCR and document parsing")
+                .title("Unified KYC API")
+                .description("API for Unified KYC")
                 .version("1.0.0"));
     }
 }

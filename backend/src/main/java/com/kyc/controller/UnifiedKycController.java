@@ -3,10 +3,16 @@ package com.kyc.controller;
 import com.kyc.dto.KycDetailsDto;
 import com.kyc.dto.LoginDto;
 import com.kyc.dto.UserDto;
+import com.kyc.entities.GovernmentIssuedId;
 import com.kyc.entities.User;
 import com.kyc.service.KycService;
 import com.kyc.service.SsnExtractionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -15,15 +21,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
+
+
 import com.kyc.service.AuthService;
 import com.kyc.service.CertificateService;
 @RestController
 @RequestMapping("api/")
 public class UnifiedKycController{
 
+    GovernmentIssuedId governmentIssuedId=new GovernmentIssuedId();
     @Autowired
     private AuthService authService;
-
     @Autowired
     private KycService kycService;
 
@@ -65,16 +75,20 @@ public class UnifiedKycController{
     }
 
     @PostMapping("/generateCertificate")
-    public ResponseEntity<String> generateCert(@RequestParam String name, @RequestParam String dob, @RequestParam String ssnNo)
+    public ResponseEntity<String> generateCert( @RequestParam String name, @RequestParam String dob, @RequestParam String ssnNo)
     {
         certService.generateCertificate(name, dob, ssnNo);
         return ResponseEntity.ok("Certificate generated");
     }
-    
-    @PostMapping("/ssnDocParser")
-    public ResponseEntity<String> SSNDocumentParser() throws IOException,InterruptedException
-    {
-        return ResponseEntity.ok(ssnExtractionService.loadFile());
-    }
 
+    @PostMapping(value = "/processSSN", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> handleSSN(@RequestParam("document") MultipartFile ssn, HttpSession session)
+            throws IOException, InterruptedException {
+    
+        String message = ssnExtractionService.loadFile(ssn);
+        session.setAttribute("extractedSSN", ssnExtractionService.getExtractedSSN());
+    
+        return ResponseEntity.ok("Extracted SSN: " + message);
+    }
+    
 }

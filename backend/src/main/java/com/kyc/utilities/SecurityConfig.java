@@ -67,7 +67,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
     .requestMatchers(
         "/api/register",
-        "/api/login",
+        "/api/login", "api/processSSN",
         "/swagger-ui.html",
         "/swagger-ui/**",
         "/v3/api-docs/**").permitAll()
@@ -80,8 +80,6 @@ public class SecurityConfig {
                 )
                 .build();
     }
-
-    
 
     @Bean
     public AuthenticationManager authManager(UserDetailsService userDetailsService) {
