@@ -45,7 +45,7 @@ const Register = () => {
   return (
     <div>
       <h2>Register</h2>
-      <p>{result}</p> {/* This will display the result of the registration */}
+      <p>{result}</p> 
     </div>
   );
 };

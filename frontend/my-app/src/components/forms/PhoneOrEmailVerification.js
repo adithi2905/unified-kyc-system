@@ -61,18 +61,30 @@ const PhoneOrEmailVerification = () => {
 
             await confirmationResult.confirm(otp);
             alert("Phone number verified successfully!");
-            navigation();
         } catch (error) {
             console.error("Error verifying OTP:", error);
             alert("Invalid OTP. Please try again.");
         }
-
-        const navigation =(e)=>
-        {
-            navigate('/register',{state:formData});
-        }
     };
+    const registerUser=async (e)=>{
+        try {
+            navigate("/otp",{state: formData });   
+            const response = await fetch('http://localhost:8081/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+            });
 
+            const result = await response.text();
+            alert(result);
+        
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to submit');}
+        }; 
+        
     return (
         <div>
             <h2>Phone Number Verification</h2>
