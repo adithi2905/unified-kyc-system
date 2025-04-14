@@ -8,10 +8,6 @@ import com.kyc.entities.User;
 import com.kyc.service.KycService;
 import com.kyc.service.SsnExtractionService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
@@ -82,12 +78,10 @@ public class UnifiedKycController{
     }
 
     @PostMapping(value = "/processSSN", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> handleSSN(@RequestParam("document") MultipartFile ssn, HttpSession session)
+    public ResponseEntity<String> handleSSN(@RequestParam("document") MultipartFile ssn)
             throws IOException, InterruptedException {
     
         String message = ssnExtractionService.loadFile(ssn);
-        session.setAttribute("extractedSSN", ssnExtractionService.getExtractedSSN());
-    
         return ResponseEntity.ok("Extracted SSN: " + message);
     }
     

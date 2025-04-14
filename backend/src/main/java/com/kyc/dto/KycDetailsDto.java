@@ -5,7 +5,6 @@ import com.kyc.entities.GovernmentIssuedId;
 import com.kyc.entities.ProofOfAddress;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter

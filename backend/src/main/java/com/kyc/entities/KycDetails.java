@@ -4,8 +4,6 @@ package com.kyc.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,8 +23,5 @@ public class KycDetails {
     private LocalDateTime submittedAt;
     private LocalDateTime approvedAt;
     private UUID reviewedBy; // Admin ID
-    public void setSsnNo(String ssnNo) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setSsnNo'");
-    }
+    
 }

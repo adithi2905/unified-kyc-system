@@ -2,16 +2,12 @@ package com.kyc.service;
 
 import com.kyc.dto.LoginDto;
 import com.kyc.dto.UserDto;
-
-
 import com.kyc.entities.User;
 import com.kyc.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +22,6 @@ public class AuthService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     public User registerUser(UserDto request) {
-        // Save user
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
@@ -36,7 +31,10 @@ public class AuthService implements UserDetailsService {
         user.setEmail(request.getEmail());
     
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepo.save(user);
+        if (!userRepo.findByEmail(user.getEmail()).isPresent()) 
+        {
+            userRepo.save(user);
+        }
         return user;
 
     }
@@ -64,7 +62,5 @@ public class AuthService implements UserDetailsService {
             throw new RuntimeException("Error occurred while loading user by username", e);
         }
     }
-
-
 
 }

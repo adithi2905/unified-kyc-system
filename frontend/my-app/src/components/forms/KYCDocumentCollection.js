@@ -3,23 +3,24 @@ import "./forms.css"
 
 const KYCDocumentCollection = () =>
 {
-    const[kycDocs,createKycDoc]=useState({
-        "govtIssuedDoc": null
-    });
+    const[kycDocs,setKycDoc]=useState(null);
 
     const[submit,setIsSubmit]=useState(false);
-
     const handleSubmit = async (e)=>
     {
         e.preventDefault();
         setIsSubmit(true);
+        const formData=new FormData();
+        formData.append("document",kycDocs);
+    
         try
         {
-        const response= await fetch("http://localhost:8081/processSSN", kycDocs,{
-            headers: {
-                "Content-Type": "multipart/form-data"}
+        const response= await fetch("http://localhost:8081/api/processSSN", {
+            method: "POST",
+            body:formData
         });
-        console.log("Uploaded successfully:", response.data);
+        const result = await response.text(); 
+        console.log("Uploaded successfully:", result);
         }
         catch(err)
         {
@@ -29,15 +30,14 @@ const KYCDocumentCollection = () =>
 
     const handleChange =(e)=>
     {
-        createKycDoc({...kycDocs,[e.target.name]:e.target.value});
-        console.log(kycDocs);
+        setKycDoc(e.target.files[0]);
     };
     
-    return (<form action="/submit" method="POST" enctype="multipart/form-data">
+    return (<form onSubmit={handleSubmit} enctype="multipart/form-data">
         <br/><br/><label for="gid" > Upload your SSN:<br/>
-        <input type="file" id="gid" name="govtIssuedDoc" value={kycDocs.govtIssuedId} placeholder="govtIssuedDoc" onChange={handleChange} required/>
+        <input type="file" id="gid" name="document" placeholder="SSN Doc" onChange={handleChange} required/>
         </label>
-        <br/><br/><button onClick={handleSubmit}>Submit</button>
+        <br/><br/><button>Submit</button>
         </form>);
 
 }

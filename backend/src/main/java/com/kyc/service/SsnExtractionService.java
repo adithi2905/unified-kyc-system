@@ -2,6 +2,7 @@ package com.kyc.service;
 
 import java.io.BufferedReader;
 import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Optional;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kyc.entities.GovernmentIssuedId;
-import com.kyc.entities.KycDetails;
 
 @Service
 public class SsnExtractionService {
