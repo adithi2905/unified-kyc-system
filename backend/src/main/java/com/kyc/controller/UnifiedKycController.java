@@ -7,10 +7,8 @@ import com.kyc.entities.GovernmentIssuedId;
 import com.kyc.entities.User;
 import com.kyc.service.KycService;
 import com.kyc.service.SsnExtractionService;
-
-import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +21,16 @@ import org.springframework.http.MediaType;
 
 import com.kyc.service.AuthService;
 import com.kyc.service.CertificateService;
+import com.kyc.service.GenerateHash;
 @RestController
-@RequestMapping("api/")
+@RequestMapping("/api")
 public class UnifiedKycController{
 
     GovernmentIssuedId governmentIssuedId=new GovernmentIssuedId();
+
+    @Autowired
+    private GenerateHash generateHash;
+
     @Autowired
     private AuthService authService;
     @Autowired
@@ -65,24 +68,29 @@ public class UnifiedKycController{
 
     @PostMapping("/submit")
     public ResponseEntity<String> submitKycDetails(
-            @ModelAttribute KycDetailsDto kycDetailsRequest) throws Exception { // Handle MultipartFile
+            @ModelAttribute KycDetailsDto kycDetailsRequest) throws Exception { 
         kycService.processKycDetails(kycDetailsRequest);
         return ResponseEntity.ok("KYC details submitted successfully.");
     }
 
     @PostMapping("/generateCertificate")
-    public ResponseEntity<String> generateCert( @RequestParam String name, @RequestParam String dob, @RequestParam String ssnNo)
+    public ResponseEntity<String> generateCert(@RequestParam String name, @RequestParam String did, @RequestParam boolean ssnVerified)
     {
-        certService.generateCertificate(name, dob, ssnNo);
-        return ResponseEntity.ok("Certificate generated");
+        String hash=certService.generateCertificate(name,did,ssnVerified);
+        return ResponseEntity.ok("Certificate generated "+hash);
     }
 
     @PostMapping(value = "/processSSN", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> handleSSN(@RequestParam("document") MultipartFile ssn)
-            throws IOException, InterruptedException {
+            throws IOException, InterruptedException, NoSuchAlgorithmException {
     
         String message = ssnExtractionService.loadFile(ssn);
-        return ResponseEntity.ok("Extracted SSN: " + message);
+        String hash=null;
+        if (message!=null)
+        {
+            hash=generateHash.generateSSNHash(ssn);
+        }
+        return ResponseEntity.ok("Extracted SSN and the hash: " + message+" "+hash);
     }
     
 }

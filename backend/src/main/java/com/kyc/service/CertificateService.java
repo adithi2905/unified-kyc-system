@@ -1,25 +1,25 @@
 package com.kyc.service;
 
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kyc.models.Certificate;
-import java.io.File;
-
+import com.kyc.dto.VerifiableCredentialsDto;
 @Service
 public class CertificateService {
         
-        public void generateCertificate(String name,String ssn,String dob)
+        public String generateCertificate(String name,String did,Boolean ssnVerified)
         {
                 try
                 {
-                Certificate cert= new Certificate(name,ssn,dob);
-                ObjectMapper mapper=new ObjectMapper();
-                mapper.writerWithDefaultPrettyPrinter().writeValue(new File("Certificate.json"), cert);
+                VerifiableCredentialsDto cert= new VerifiableCredentialsDto(name,did,ssnVerified);
+                GenerateHash generateVCHash=new GenerateHash();
+                String vchash=generateVCHash.generateVCHash(cert);
+                return vchash;
                 } 
                 catch(Exception ex)
                 {
                         ex.printStackTrace();
-                }   
+                        return null;  
+                } 
+                
         }
         
 
