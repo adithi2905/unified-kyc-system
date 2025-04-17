@@ -18,6 +18,7 @@ function App() {
                 <Route path="/otp" element={<PhoneOrEmailVerification/>}></Route>
                 <Route path="/register" element={<Register/>}></Route>
                 <Route path="/login" element={<Login/>}></Route>
+                <Route path="/result" element={<Certificate/>}></Route>
             </Routes>
         </BrowserRouter>
     )

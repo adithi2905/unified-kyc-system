@@ -1,21 +1,27 @@
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 
-import React, {useEffect,useState} from "react";
+const ResultPage = () => {
+    const location = useLocation();
+    const response = location.state?.response || {};
 
-const Certificate = () =>
-{
-    const[certData,setCertData]=useState(null);
-    useEffect(()=>{fetch("http://localhost:8081/api/generateCertificate").then(res=>res.json()).then(data=>setCertData(data)).catch((err)=>console.error("Error loading JSON",err))},[]);
-    return (<div style={{
-        border: '2px solid black',
-        borderRadius: '110px',
-        padding: '16px'
-    }}><h1>CERTIFICATE OF VERIFICATION</h1>
-    <center><h2>{certData?.name}</h2>
-    <h2>is born on {certData?.dob},</h2>
-    <h3>Her SSN has been verified successfully</h3>
-    <h3>on {certData?.verifiedOn}.</h3>
-    <h4>by {certData?.verifiedBy}</h4>
-    <p>Valid for next six months.</p></center>
-    </div>);
-}
-export default Certificate;
+    const vc = response.vcResponse?.vc || {};
+    const vcHash = response.vcResponse?.vcHash;
+    const ssnHash = response.ssnHash;
+
+    return (
+        <div>
+            <h2>Upload Result</h2>
+            <p><strong>DID:</strong> {vc.did}</p>
+            <p><strong>Name:</strong> {vc.name}</p>
+            <p><strong>SSN Verification Status:</strong> {vc.ssnVerificationStatus}</p>
+            <p><strong>VC Hash:</strong> {vcHash}</p>
+            <p><strong>SSN Hash:</strong> {ssnHash}</p>
+            <p><strong>Verified On:</strong> {vc.verifiedOn}</p>
+            <p><strong>Expires On:</strong> {vc.expiresOn}</p>
+            <p><strong>Verified By:</strong> {vc.verifiedBy}</p>
+        </div>
+    );
+};
+
+export default ResultPage;

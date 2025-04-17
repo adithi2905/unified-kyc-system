@@ -1,11 +1,13 @@
-import React,{useState,useNavigate} from 'react';
+import React,{useState} from 'react';
 import "./forms.css"
+import { useNavigate } from 'react-router-dom';
 
 const KYCDocumentCollection = () =>
 {
     const[kycDocs,setKycDoc]=useState(null);
 
     const[submit,setIsSubmit]=useState(false);
+    const navigate=useNavigate();
     const handleSubmit = async (e)=>
     {
         e.preventDefault();
@@ -19,8 +21,10 @@ const KYCDocumentCollection = () =>
             method: "POST",
             body:formData
         });
-        const result = await response.text(); 
-        console.log("Uploaded successfully:", result);
+        alert("Uploaded successfully");
+        const result=await response.json();
+        navigate("/result",{state:{response: result}});
+
         }
         catch(err)
         {

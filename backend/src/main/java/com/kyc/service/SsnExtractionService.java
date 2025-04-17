@@ -20,11 +20,13 @@ import com.kyc.entities.GovernmentIssuedId;
 public class SsnExtractionService {
 
     private final GovernmentIssuedId governmentIssuedId = new GovernmentIssuedId();
+
     @Autowired 
     private GenerateHash generateHash;
+    
     @Autowired
     private CertificateService certService;
-   
+
     public SSNResponse loadFile(MultipartFile ssn) throws InterruptedException, NoSuchAlgorithmException {
         File tempFile = null;
 
