@@ -4,10 +4,10 @@ import React, {useEffect,useState} from "react";
 const Certificate = () =>
 {
     const[certData,setCertData]=useState(null);
-    useEffect(()=>{fetch("Certificate.json").then(res=>res.json()).then(data=>setCertData(data)).catch((err)=>console.error("Error loading JSON",err))},[]);
+    useEffect(()=>{fetch("http://localhost:8081/api/generateCertificate").then(res=>res.json()).then(data=>setCertData(data)).catch((err)=>console.error("Error loading JSON",err))},[]);
     return (<div style={{
         border: '2px solid black',
-        borderRadius: '10px',
+        borderRadius: '110px',
         padding: '16px'
     }}><h1>CERTIFICATE OF VERIFICATION</h1>
     <center><h2>{certData?.name}</h2>

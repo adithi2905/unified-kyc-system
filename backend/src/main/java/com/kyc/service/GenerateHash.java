@@ -9,11 +9,9 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kyc.dto.VerifiableCredentialsDto;
 
-import io.ipfs.api.Multipart;
 
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class GenerateHash {
@@ -31,9 +29,8 @@ public class GenerateHash {
         return hash;
     }   
 
-    public String generateSSNHash(MultipartFile ssn) throws IOException, NoSuchAlgorithmException
+    public String generateSSNHash(byte[]imgBytes) throws IOException, NoSuchAlgorithmException
     {
-        byte[]imgBytes=ssn.getBytes();
         MessageDigest digest=MessageDigest.getInstance("SHA-256"); 
         byte[]hashBytes=digest.digest(imgBytes);
         String hash=Hex.encodeHexString(hashBytes);

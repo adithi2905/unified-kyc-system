@@ -5,21 +5,31 @@ import java.io.File;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kyc.dto.SSNResponse;
+import com.kyc.dto.VCResponse;
 import com.kyc.entities.GovernmentIssuedId;
 
 @Service
 public class SsnExtractionService {
 
-    private final GovernmentIssuedId governmentIssuedId = new GovernmentIssuedId(); 
-    public String loadFile(MultipartFile ssn) throws InterruptedException {
+    private final GovernmentIssuedId governmentIssuedId = new GovernmentIssuedId();
+    @Autowired 
+    private GenerateHash generateHash;
+    @Autowired
+    private CertificateService certService;
+   
+    public SSNResponse loadFile(MultipartFile ssn) throws InterruptedException, NoSuchAlgorithmException {
         File tempFile = null;
 
         try {
+            byte[]ssnBytes=ssn.getBytes();
             String extension = Optional.ofNullable(ssn.getOriginalFilename())
                     .filter(f -> f.contains("."))
                     .map(f -> f.substring(f.lastIndexOf(".")))
@@ -30,17 +40,27 @@ public class SsnExtractionService {
 
             String extractedSSN = runExtractionScript(tempFile.getAbsolutePath());
 
+            if (!"NOT_FOUND".equals(extractedSSN))
+        {
             governmentIssuedId.setSsn(extractedSSN);
-
-            return extractedSSN;
-
+            String hash=generateHash.generateSSNHash(ssnBytes);
+            VCResponse vcResponse=certService.generateCertificate("Adithi","2wewsaskas",true);
+            SSNResponse ssnResponse = new SSNResponse();
+            ssnResponse.setSsnHash(hash);
+            ssnResponse.setVcResponse(vcResponse);
+            return ssnResponse;
+            
+        }
+        return null;
         } catch (IOException e) {
             throw new RuntimeException("Failed to process image", e);
-        } finally {
+        } 
+        finally
+        {
             if (tempFile != null && tempFile.exists()) {
                 tempFile.delete();
-            }
-        }
+        }}
+        
     }
 
     private String runExtractionScript(String filePath) throws IOException, InterruptedException {

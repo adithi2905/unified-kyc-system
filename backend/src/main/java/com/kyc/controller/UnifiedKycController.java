@@ -2,7 +2,9 @@ package com.kyc.controller;
 
 import com.kyc.dto.KycDetailsDto;
 import com.kyc.dto.LoginDto;
+import com.kyc.dto.SSNResponse;
 import com.kyc.dto.UserDto;
+import com.kyc.dto.VCResponse;
 import com.kyc.entities.GovernmentIssuedId;
 import com.kyc.entities.User;
 import com.kyc.service.KycService;
@@ -73,24 +75,14 @@ public class UnifiedKycController{
         return ResponseEntity.ok("KYC details submitted successfully.");
     }
 
-    @PostMapping("/generateCertificate")
-    public ResponseEntity<String> generateCert(@RequestParam String name, @RequestParam String did, @RequestParam boolean ssnVerified)
-    {
-        String hash=certService.generateCertificate(name,did,ssnVerified);
-        return ResponseEntity.ok("Certificate generated "+hash);
-    }
-
     @PostMapping(value = "/processSSN", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> handleSSN(@RequestParam("document") MultipartFile ssn)
+    public ResponseEntity<SSNResponse> handleSSN(@RequestParam("document") MultipartFile ssn)
             throws IOException, InterruptedException, NoSuchAlgorithmException {
     
-        String message = ssnExtractionService.loadFile(ssn);
-        String hash=null;
-        if (message!=null)
-        {
-            hash=generateHash.generateSSNHash(ssn);
-        }
-        return ResponseEntity.ok("Extracted SSN and the hash: " + message+" "+hash);
+        SSNResponse message = ssnExtractionService.loadFile(ssn);  
+
+        return ResponseEntity.ok(message);
     }
+
     
 }
