@@ -9,8 +9,7 @@ import com.kyc.entities.GovernmentIssuedId;
 import com.kyc.entities.User;
 import com.kyc.service.KycService;
 import com.kyc.service.SsnExtractionService;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class UnifiedKycController{
 
     @PostMapping(value = "/processSSN", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SSNResponse> handleSSN(@RequestParam("document") MultipartFile ssn)
-            throws IOException, InterruptedException, NoSuchAlgorithmException {
+            throws Exception {
     
         SSNResponse message = ssnExtractionService.loadFile(ssn);  
 

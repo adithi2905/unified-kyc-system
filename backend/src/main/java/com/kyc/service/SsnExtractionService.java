@@ -5,7 +5,6 @@ import java.io.File;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,21 +12,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kyc.dto.SSNResponse;
-import com.kyc.dto.VCResponse;
 import com.kyc.entities.GovernmentIssuedId;
 
 @Service
 public class SsnExtractionService {
-
     private final GovernmentIssuedId governmentIssuedId = new GovernmentIssuedId();
 
-    @Autowired 
-    private GenerateHash generateHash;
-    
     @Autowired
-    private CertificateService certService;
+    private ProcessSSNResult processSSNResult;
 
-    public SSNResponse loadFile(MultipartFile ssn) throws InterruptedException, NoSuchAlgorithmException {
+    public SSNResponse loadFile(MultipartFile ssn) throws Exception {
         File tempFile = null;
 
         try {
@@ -41,18 +35,12 @@ public class SsnExtractionService {
             ssn.transferTo(tempFile);
 
             String extractedSSN = runExtractionScript(tempFile.getAbsolutePath());
-
-            if (!"NOT_FOUND".equals(extractedSSN))
-        {
             governmentIssuedId.setSsn(extractedSSN);
-            String hash=generateHash.generateSSNHash(ssnBytes);
-            VCResponse vcResponse=certService.generateCertificate("Adithi","2wewsaskas",true);
-            SSNResponse ssnResponse = new SSNResponse();
-            ssnResponse.setSsnHash(hash);
-            ssnResponse.setVcResponse(vcResponse);
-            return ssnResponse;
             
-        }
+            if (!"NOT_FOUND".equals(extractedSSN))
+            {
+            return processSSNResult.processSSNResults(extractedSSN, ssnBytes);
+            }
         return null;
         } catch (IOException e) {
             throw new RuntimeException("Failed to process image", e);

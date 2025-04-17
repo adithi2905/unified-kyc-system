@@ -8,7 +8,6 @@ const ResultPage = () => {
     const vc = response.vcResponse?.vc || {};
     const vcHash = response.vcResponse?.vcHash;
     const ssnHash = response.ssnHash;
-
     return (
         <div>
             <h2>Upload Result</h2>
@@ -20,6 +19,7 @@ const ResultPage = () => {
             <p><strong>Verified On:</strong> {vc.verifiedOn}</p>
             <p><strong>Expires On:</strong> {vc.expiresOn}</p>
             <p><strong>Verified By:</strong> {vc.verifiedBy}</p>
+            
         </div>
     );
 };
