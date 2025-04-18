@@ -7,7 +7,7 @@ contract PolygonLayer is CCIPSender{
     struct User {
         bool isRegistered;
         bool isVerified;
-        string userDataHash;
+        string vcHash;
         uint256 registeredAt;
         uint256 verifiedAt;
     }
@@ -15,10 +15,10 @@ contract PolygonLayer is CCIPSender{
     mapping(address => User) public users;
     address public admin;
 
-    event UserRegistered(address indexed user, string userDataHash, uint256 registeredAt);
-    event UserUpdated(address indexed user, string newHashedUserData);
+    event UserRegistered(address indexed user, string vcHash, uint256 registeredAt);
+    event UserUpdated(address indexed user, string newHashedVC);
     event UserVerified(address indexed user, bool isVerified, uint256 verifiedAt);
-    event SendToEthereum(address _user,string _userDataHash);
+    event SendToEthereum(address _user,string _vcHash);
     event UserVerificationRequested(address indexed _user);
 
     modifier onlyAdmin() {
@@ -31,18 +31,18 @@ contract PolygonLayer is CCIPSender{
         admin = msg.sender;  
     }
 
-    function registerUser(address _user, string calldata _userDataHash) public {
+    function registerUser(address _user, string calldata _vcHash) public {
         require(!users[_user].isRegistered, "User is already registered");
 
         users[_user] = User({
             isRegistered: true,
             isVerified: false,
-            userDataHash: _userDataHash,
+            vcHash: _vcHash,
             registeredAt: block.timestamp,
             verifiedAt: 0
         });
 
-        emit UserRegistered(_user, _userDataHash, block.timestamp);
+        emit UserRegistered(_user, _vcHash, block.timestamp);
     }
 
     function verifyKYCData(address _user) external onlyAdmin {
@@ -53,26 +53,25 @@ contract PolygonLayer is CCIPSender{
         users[_user].verifiedAt = block.timestamp;
 
         emit UserVerified(_user, true, block.timestamp);
-        bytes memory payload=abi.encode(_user,users[_user].userDataHash,block.timestamp);
+        bytes memory payload=abi.encode(_user,users[_user].vcHash,block.timestamp);
         sendMessage(ETHEREUM_CHAIN_ID,payload);
-        emit SendToEthereum(_user,users[_user].userDataHash);
+        emit SendToEthereum(_user,users[_user].vcHash);
 
     }
-    function updateUser(address _user,string calldata _newHashedData) external onlyAdmin
+    function updateUser(address _user,string calldata _newHashedVC) external onlyAdmin
     {
         require(users[_user].isRegistered,"User is not registered");
-        users[_user].userDataHash=_newHashedData;
+        users[_user].vcHash=_newHashedVC;
         users[_user].registeredAt=block.timestamp;
-        emit UserUpdated(_user,_newHashedData);
+        emit UserUpdated(_user,_newHashedVC);
         emit UserVerificationRequested(_user);
     }
-    
 
     function getKYC(address _user) public view returns (bool, bool, string memory, uint256, uint256) {
         return (
             users[_user].isRegistered,
             users[_user].isVerified,
-            users[_user].userDataHash,
+            users[_user].vcHash,
             users[_user].registeredAt,
             users[_user].verifiedAt
         );

@@ -1,13 +1,10 @@
 package com.kyc.controller;
 
-import com.kyc.dto.KycDetailsDto;
 import com.kyc.dto.LoginDto;
 import com.kyc.dto.SSNResponse;
 import com.kyc.dto.UserDto;
-import com.kyc.dto.VCResponse;
 import com.kyc.entities.GovernmentIssuedId;
 import com.kyc.entities.User;
-import com.kyc.service.KycService;
 import com.kyc.service.SsnExtractionService;
 
 import java.util.Optional;
@@ -21,8 +18,6 @@ import org.springframework.http.MediaType;
 
 
 import com.kyc.service.AuthService;
-import com.kyc.service.CertificateService;
-import com.kyc.service.GenerateHash;
 @RestController
 @RequestMapping("/api")
 public class UnifiedKycController{
@@ -30,15 +25,7 @@ public class UnifiedKycController{
     GovernmentIssuedId governmentIssuedId=new GovernmentIssuedId();
 
     @Autowired
-    private GenerateHash generateHash;
-
-    @Autowired
     private AuthService authService;
-    @Autowired
-    private KycService kycService;
-
-    @Autowired
-    private CertificateService certService;
 
     @Autowired
     private SsnExtractionService ssnExtractionService;
@@ -65,13 +52,6 @@ public class UnifiedKycController{
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
         }
-    }
-
-    @PostMapping("/submit")
-    public ResponseEntity<String> submitKycDetails(
-            @ModelAttribute KycDetailsDto kycDetailsRequest) throws Exception { 
-        kycService.processKycDetails(kycDetailsRequest);
-        return ResponseEntity.ok("KYC details submitted successfully.");
     }
 
     @PostMapping(value = "/processSSN", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
